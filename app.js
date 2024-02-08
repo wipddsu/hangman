@@ -1,10 +1,38 @@
 const wordsBox = document.querySelector('.words');
 const startBtn = document.getElementById('startGame');
+let hangman;
 
-function Hangman() {}
+function Hangman(word, life) {
+  this.word = word.toUpperCase().split('');
+  this.life = life;
+
+  this.getGuess = function (guess) {
+    if (this.word.includes(guess.toUpperCase())) {
+      return guess.toUpperCase();
+    } else {
+      return;
+    }
+  };
+
+  this.puzzlize = function () {
+    return this.word.map((el) => (el !== ' ' ? '*' : el));
+  };
+
+  this.match = function (letter) {
+    letter = letter.toUpperCase();
+    index = this.word.indexOf(letter);
+
+    console.log(index);
+  };
+}
 
 function getKeyNum(e) {
-  console.log(e.keyCode);
+  const guess = e.key;
+  const matchLetter = hangman.getGuess(guess);
+
+  if (matchLetter) {
+    hangman.match(matchLetter);
+  }
 }
 document.addEventListener('keydown', getKeyNum);
 
@@ -19,8 +47,9 @@ async function getWords(wordCount) {
 }
 
 function render(word) {
-  word.map((el) => {
-    el = el !== ' ' ? '*' : el;
+  wordsBox.innerHTML = '';
+
+  hangman.puzzlize().forEach((el) => {
     const span = document.createElement('span');
     span.innerText = el.toUpperCase();
     wordsBox.append(span);
@@ -29,15 +58,9 @@ function render(word) {
 
 async function startGame() {
   const word = await getWords(2);
+  hangman = new Hangman(word, 5);
 
-  if (wordsBox.querySelector('span')) {
-    const wordsList = wordsBox.querySelectorAll('span');
-    for (const el of wordsList) {
-      el.remove();
-    }
-  }
-
-  render(word.split(''));
+  render();
 }
 
 startBtn.addEventListener('click', startGame);
