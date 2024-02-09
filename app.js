@@ -4,7 +4,11 @@ let hangman;
 
 function Hangman(word, life) {
   this.word = word.toUpperCase().split('');
-  this.life = life;
+  this.leftlife = life;
+  this.guessLetter = '';
+  this.remainLetter = this.word.map((el) => (el !== ' ' ? '*' : el));
+  this.status = false;
+  this.renderedResult = [];
 
   this.getGuess = function (guess) {
     if (this.word.includes(guess.toUpperCase())) {
@@ -15,14 +19,28 @@ function Hangman(word, life) {
   };
 
   this.puzzlize = function () {
-    return this.word.map((el) => (el !== ' ' ? '*' : el));
+    const target = this.guessLetter;
+    if (!this.status) {
+      this.status = !this.status;
+      return this.remainLetter;
+    } else {
+      if (!this.seenLetter.includes(target)) this.seenLetter.push(target);
+      const indexes = [];
+      this.word.forEach((letter, idx) => {
+        if (letter === target) indexes.push(idx);
+      });
+      if (indexes.length > 0) {
+        indexes.forEach((idx) => {
+          this.remainLetter[idx] = target;
+        });
+        return this.remainLetter;
+      }
+    }
   };
 
   this.match = function (letter) {
-    letter = letter.toUpperCase();
-    index = this.word.indexOf(letter);
-
-    console.log(index);
+    const index = this.word.indexOf(letter);
+    this.guessLetter = letter;
   };
 }
 
@@ -32,7 +50,11 @@ function getKeyNum(e) {
 
   if (matchLetter) {
     hangman.match(matchLetter);
+  } else {
+    return;
   }
+
+  render();
 }
 document.addEventListener('keydown', getKeyNum);
 
@@ -46,7 +68,7 @@ async function getWords(wordCount) {
   }
 }
 
-function render(word) {
+function render() {
   wordsBox.innerHTML = '';
 
   hangman.puzzlize().forEach((el) => {
