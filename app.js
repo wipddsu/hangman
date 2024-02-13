@@ -8,7 +8,7 @@ function Hangman(word, life) {
   this.guessLetter = '';
   this.remainLetter = this.word.map((el) => (el !== ' ' ? '*' : el));
   this.status = false;
-  this.renderedResult = [];
+  this.copy = [...this.word];
 
   this.getGuess = function (guess) {
     if (this.word.includes(guess.toUpperCase())) {
@@ -20,21 +20,19 @@ function Hangman(word, life) {
 
   this.puzzlize = function () {
     const target = this.guessLetter;
+
     if (!this.status) {
       this.status = !this.status;
       return this.remainLetter;
     } else {
-      if (!this.seenLetter.includes(target)) this.seenLetter.push(target);
-      const indexes = [];
-      this.word.forEach((letter, idx) => {
-        if (letter === target) indexes.push(idx);
-      });
-      if (indexes.length > 0) {
-        indexes.forEach((idx) => {
-          this.remainLetter[idx] = target;
-        });
-        return this.remainLetter;
+      const index = this.copy.indexOf(this.guessLetter);
+
+      if (index !== -1) {
+        this.copy.splice(index, 1, '*');
+        this.remainLetter.splice(index, 1, this.guessLetter);
       }
+
+      return this.remainLetter;
     }
   };
 
