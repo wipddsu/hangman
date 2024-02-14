@@ -41,13 +41,13 @@ div.words span:not(:last-child) {
   margin-right: 2px;
 }
 
-div.lifeNum p {
+div.message p {
   color: #b8c1ec;
   text-align: center;
   margin-bottom: 32px;
 }
 
-div.lifeNum p span {
+div.message p span {
   font-weight: bold;
   color: #eebbc3;
   font-size: 20px;

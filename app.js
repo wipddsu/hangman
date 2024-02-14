@@ -1,63 +1,64 @@
 const wordsBox = document.querySelector('.words');
 const startBtn = document.getElementById('startGame');
+const msgBox = document.querySelector('.message p');
+const lifeCount = document.getElementById('life');
 let hangman;
 
 function Hangman(word, life) {
+  // property
   this.word = word.toUpperCase().split('');
-  this.leftlife = life;
-  this.guessLetter = '';
-  this.remainLetter = this.word.map((el) => (el !== ' ' ? '*' : el));
-  this.status = false;
-  this.copy = [...this.word];
+  this.leftLife = life;
+  this.guessedLetters = [];
+  this.gameStatus = 'playing';
 
+  // method
   this.getGuess = function (guess) {
     if (this.word.includes(guess.toUpperCase())) {
-      return guess.toUpperCase();
+      this.guessedLetters.push(guess.toUpperCase());
+      return true;
     } else {
-      return;
+      return false;
     }
   };
 
   this.puzzlize = function () {
-    const target = this.guessLetter;
+    let puzzle = '';
 
-    if (!this.status) {
-      this.status = !this.status;
-      return this.remainLetter;
-    } else {
-      const index = this.copy.indexOf(this.guessLetter);
-
-      if (index !== -1) {
-        this.copy.splice(index, 1, '*');
-        this.remainLetter.splice(index, 1, this.guessLetter);
+    this.word.forEach((letter) => {
+      if (this.guessedLetters.includes(letter) || letter === ' ') {
+        puzzle += letter;
+      } else {
+        puzzle += '*';
       }
-
-      return this.remainLetter;
-    }
-  };
-
-  this.match = function (letter) {
-    const index = this.word.indexOf(letter);
-    this.guessLetter = letter;
+    });
+    return puzzle;
   };
 }
 
 function getKeyNum(e) {
   const guess = e.key;
-  const matchLetter = hangman.getGuess(guess);
+  const match = hangman.getGuess(guess);
 
-  if (matchLetter) {
-    hangman.match(matchLetter);
+  // match 값이 true일 경우에만 매치된 글자 렌더링
+  if (match) {
+    render();
   } else {
-    return;
+    hangman.leftLife -= 1;
+    lifeCount.textContent = hangman.leftLife;
   }
 
-  render();
+  // 라이프가 0이 되면 이벤드 핸들러 제거
+  // 종료 메세지로 전환
+  if (hangman.leftLife === 0) {
+    document.removeEventListener('keydown', getKeyNum);
+    msgBox.innerHTML = 'Failed😂 Try again!';
+  }
 }
 document.addEventListener('keydown', getKeyNum);
 
 async function getWords(wordCount) {
   const response = await fetch(`https://puzzle.mead.io/puzzle?wordCount=${wordCount}`);
+
   if (response.status === 200) {
     const data = await response.json();
     return data.puzzle;
@@ -69,16 +70,20 @@ async function getWords(wordCount) {
 function render() {
   wordsBox.innerHTML = '';
 
-  hangman.puzzlize().forEach((el) => {
-    const span = document.createElement('span');
-    span.innerText = el.toUpperCase();
-    wordsBox.append(span);
-  });
+  hangman
+    .puzzlize()
+    .split('')
+    .forEach((el) => {
+      const span = document.createElement('span');
+      span.innerText = el.toUpperCase();
+      wordsBox.append(span);
+    });
 }
 
 async function startGame() {
   const word = await getWords(2);
-  hangman = new Hangman(word, 5);
+  hangman = new Hangman(word, 10);
+  lifeCount.textContent = hangman.leftLife;
 
   render();
 }
