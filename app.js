@@ -1,7 +1,6 @@
 const wordsBox = document.querySelector('.words');
 const startBtn = document.getElementById('startGame');
 const msgBox = document.querySelector('.message p');
-const lifeCount = document.getElementById('life');
 let hangman;
 
 function Hangman(word, life) {
@@ -38,20 +37,23 @@ function Hangman(word, life) {
 function getKeyNum(e) {
   const guess = e.key;
   const match = hangman.getGuess(guess);
+  const lifeCount = document.getElementById('life');
 
   // match 값이 true일 경우에만 매치된 글자 렌더링
   if (match) {
     render();
   } else {
     hangman.leftLife -= 1;
-    lifeCount.textContent = hangman.leftLife;
+    lifeCount.innerHTML = hangman.leftLife;
   }
 
-  // 라이프가 0이 되면 이벤드 핸들러 제거
-  // 종료 메세지로 전환
+  // 라이프가 0이 되면 이벤드 핸들러 제거 & 종료 메세지로 전환
   if (hangman.leftLife === 0) {
-    document.removeEventListener('keydown', getKeyNum);
+    const answer = hangman.word.map((item) => `<span>${item}</span>`);
+
+    wordsBox.innerHTML = answer.join('\n');
     msgBox.innerHTML = 'Failed😂 Try again!';
+    document.removeEventListener('keydown', getKeyNum);
   }
 }
 document.addEventListener('keydown', getKeyNum);
@@ -75,7 +77,7 @@ function render() {
     .split('')
     .forEach((el) => {
       const span = document.createElement('span');
-      span.innerText = el.toUpperCase();
+      span.textContent = el.toUpperCase();
       wordsBox.append(span);
     });
 }
@@ -83,7 +85,8 @@ function render() {
 async function startGame() {
   const word = await getWords(2);
   hangman = new Hangman(word, 10);
-  lifeCount.textContent = hangman.leftLife;
+  msgBox.innerHTML = `You have <span id="life">10</span> lives`;
+  console.log(hangman);
 
   render();
 }
