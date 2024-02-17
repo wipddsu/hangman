@@ -8,6 +8,7 @@ function Hangman(word, life) {
   this.word = word.toUpperCase().split('');
   this.leftLife = life;
   this.guessedLetters = [];
+  this.remainLetters = '';
   this.gameStatus = 'playing';
 
   // method
@@ -30,6 +31,8 @@ function Hangman(word, life) {
         puzzle += '*';
       }
     });
+    hangman.remainLetters = puzzle;
+
     return puzzle;
   };
 }
@@ -54,6 +57,11 @@ function getKeyNum(e) {
     wordsBox.innerHTML = answer.join('\n');
     msgBox.innerHTML = 'Failed😂 Try again!';
     document.removeEventListener('keydown', getKeyNum);
+  }
+
+  // 전부 맞췄을 경우 축하 메세지로 전환
+  if (!hangman.remainLetters.includes('*')) {
+    msgBox.innerHTML = 'Congratuation!🎉🎉';
   }
 }
 
@@ -86,6 +94,7 @@ async function startGame() {
   hangman = new Hangman(word, 10);
   msgBox.innerHTML = `You have <span id="life">10</span> lives`;
   document.addEventListener('keydown', getKeyNum);
+  console.log(hangman.word);
 
   render();
 }
