@@ -44,7 +44,7 @@ function getKeyNum(e) {
     render();
   } else {
     hangman.leftLife -= 1;
-    lifeCount.innerHTML = hangman.leftLife;
+    lifeCount.textContent = hangman.leftLife;
   }
 
   // 라이프가 0이 되면 이벤드 핸들러 제거 & 종료 메세지로 전환
@@ -56,7 +56,6 @@ function getKeyNum(e) {
     document.removeEventListener('keydown', getKeyNum);
   }
 }
-document.addEventListener('keydown', getKeyNum);
 
 async function getWords(wordCount) {
   const response = await fetch(`https://puzzle.mead.io/puzzle?wordCount=${wordCount}`);
@@ -86,7 +85,7 @@ async function startGame() {
   const word = await getWords(2);
   hangman = new Hangman(word, 10);
   msgBox.innerHTML = `You have <span id="life">10</span> lives`;
-  console.log(hangman);
+  document.addEventListener('keydown', getKeyNum);
 
   render();
 }
