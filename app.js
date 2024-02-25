@@ -3,25 +3,25 @@ const startBtn = document.getElementById('startGame');
 const msgBox = document.querySelector('.message p');
 let hangman;
 
-function Hangman(word, life) {
-  // property
-  this.word = word.toUpperCase().split('');
-  this.leftLife = life;
-  this.guessedLetters = [];
-  this.remainLetters = '';
-  this.gameStatus = 'playing';
+class Hangman {
+  constructor(word, life) {
+    this.word = word.toUpperCase().split('');
+    this.lifeCount = life;
+    this.guessedLetters = [];
+    this.remainLetters = '';
+    this.gameStatus = 'playing';
+  }
 
-  // method
-  this.getGuess = function (guess) {
+  getGuess(guess) {
     if (this.word.includes(guess.toUpperCase())) {
       this.guessedLetters.push(guess.toUpperCase());
       return true;
     } else {
       return false;
     }
-  };
+  }
 
-  this.puzzlize = function () {
+  puzzlize() {
     let puzzle = '';
 
     this.word.forEach((letter) => {
@@ -34,24 +34,26 @@ function Hangman(word, life) {
     hangman.remainLetters = puzzle;
 
     return puzzle;
-  };
+  }
+
+  isMatch(guess) {
+    const match = this.getGuess(guess);
+
+    if (match) {
+      render();
+    } else {
+      this.lifeCount -= 1;
+      console.log(this.lifeCount);
+    }
+  }
 }
 
 function getKeyNum(e) {
   const guess = e.key;
-  const match = hangman.getGuess(guess);
-  const lifeCount = document.getElementById('life');
-
-  // match 값이 true일 경우에만 매치된 글자 렌더링
-  if (match) {
-    render();
-  } else {
-    hangman.leftLife -= 1;
-    lifeCount.textContent = hangman.leftLife;
-  }
+  hangman.isMatch(guess);
 
   // 라이프가 0이 되면 이벤드 핸들러 제거 & 종료 메세지로 전환
-  if (hangman.leftLife === 0) {
+  if (hangman.lifeCount === 0) {
     const answer = hangman.word.map((item) => `<span>${item}</span>`);
 
     wordsBox.innerHTML = answer.join('\n');
@@ -62,6 +64,7 @@ function getKeyNum(e) {
   // 전부 맞췄을 경우 축하 메세지로 전환
   if (!hangman.remainLetters.includes('*')) {
     msgBox.innerHTML = 'Congratuation!🎉🎉';
+    document.removeEventListener('keydown', getKeyNum);
   }
 }
 
@@ -92,7 +95,7 @@ function render() {
 async function startGame() {
   const word = await getWords(2);
   hangman = new Hangman(word, 10);
-  msgBox.innerHTML = `You have <span id="life">10</span> lives`;
+  msgBox.innerHTML = `You have <span id="life">${hangman.lifeCount}</span> lives`;
   document.addEventListener('keydown', getKeyNum);
   console.log(hangman.word);
 
